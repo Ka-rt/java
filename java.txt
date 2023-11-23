@@ -1,0 +1,739 @@
+Counter.java
+
+package week_10;
+
+public class Counter extends Thread {
+        int n;
+        Storage s;
+
+        Counter(int no,Storage s1){
+                n = no;
+                s = s1;
+        }
+
+        public void run() {
+                int i=1;
+                while(n > 0) {
+                        int t = s.write(i);
+                        System.out.println("Counter: "+t);
+                        i++;
+                        n--;
+                }
+        }
+}
+______________________________________________________________________________________________
+TestCounter.java
+
+package week_10;
+
+public class Storage extends Thread {
+        int n;
+        boolean flag = false;
+
+        Storage(){
+
+        }
+
+
+        synchronized int write(int i) {
+                while(flag == true) {
+                        try {
+                                wait();
+                        } catch (InterruptedException e) {
+                                e.printStackTrace();
+                        }
+                }
+
+                flag = true;
+                n = i;
+                notifyAll();
+
+                return n;
+        }
+
+        synchronized int Read() {
+                while(flag == false) {
+                        try {
+                                wait();
+                        } catch (InterruptedException e) {
+                                e.printStackTrace();
+                        }
+                }
+
+                flag = false;
+                notifyAll();
+
+                return n;
+        }
+}
+__________________________________________________________________________________________________
+Printer.java
+
+package week_10;
+
+public class Printer extends Thread {
+        int n;
+        Storage s ;
+
+        Printer(int no,Storage s1){
+                n = no;
+                s = s1;
+        }
+
+        public void run() {
+                while(n > 0) {
+                        int t = s.Read();
+                        System.out.println("Printer: "+t);
+                        n--;
+                }
+        }
+}
+_____________________________________________________________________________________________________
+Storage.java
+
+package week_10;
+
+public class Storage extends Thread {
+        int n;
+        boolean flag = false;
+
+        Storage(){
+
+        }
+
+
+        synchronized int write(int i) {
+                while(flag == true) {
+                        try {
+                                wait();
+                        } catch (InterruptedException e) {
+                                e.printStackTrace();
+                        }
+                }
+
+                flag = true;
+                n = i;
+                notifyAll();
+
+                return n;
+        }
+
+        synchronized int Read() {
+                while(flag == false) {
+                        try {
+                                wait();
+                        } catch (InterruptedException e) {
+                                e.printStackTrace();
+                        }
+                }
+
+                flag = false;
+                notifyAll();
+
+                return n;
+        }
+}
+_________________________________________________________________________________________________
+FiboThread.java
+
+package week_10;
+
+public class FiboThread extends Thread{
+
+        int n,id;
+
+        FiboThread(int no,int i){
+                n = no;
+                id = i;
+        }
+        public void run() {
+                int a = 0,b = 1;
+
+                System.out.println("From Thread"+id+": "+a);
+                System.out.println("From Thread"+id+": "+b);
+
+                while(n > 0)
+                {
+                        int c = a+b;
+                        System.out.println("From Thread"+id+": "+(a+b));
+                        a = b;
+                        b = c;
+                        n--;
+                }
+        }
+}
+______________________________________________________________________________________________________
+FiboDriver.java
+
+package week_10;
+import java.util.*;
+
+public class FiboDriver {
+        public static void main(String args[]) {
+                Scanner in = new Scanner(System.in);
+
+                System.out.print("Enter no of threads: ");
+                int no = in.nextInt();
+
+                FiboThread f[] = new FiboThread[no];
+
+                for(int i=0;i<no;i++) {
+                        System.out.print("N for Thread"+(i+1)+"\n");
+                        int n = in.nextInt();
+                        f[i] = new FiboThread(n,i+1);
+                }
+
+                try {
+                        for(int i=0;i<no;i++) {
+                                f[i].start();
+                        }
+                        for(int i=no-1;i>=0;i--)
+                                f[i].join();
+                }
+                catch(InterruptedException e) {
+                        System.out.print("main Interrupted");
+                }
+
+                in.close();
+        }
+}
+___________________________________________________________________________________________________
+Circle.java
+
+package week_9;
+
+import java.util.*;
+
+public class Circle extends Region {
+
+        Point center;
+        double radius;
+
+        Circle(){
+                center = new Point();
+                get();
+        }
+
+        void get() {
+                Scanner in = new Scanner(System.in);
+
+                System.out.print("Enter name_of_region: ");
+                name_of_region = in.next();
+
+                System.out.print("Enter X(center) coordinate :");
+                center.x = in.nextInt();
+
+                System.out.print("Enter Y(center) coordinate :");
+                center.y = in.nextInt();
+
+                System.out.print("Enter the radius: ");
+                radius = in.nextDouble();
+
+        }
+
+        @Override
+        public boolean Contains(Point p) {
+
+                double t1 = p.x - center.x;
+                double t2 = p.y - center.y;
+
+                t1 = t1*t1;
+                t2 = t2*t2;
+
+
+                double r = radius * radius;
+
+                if((t1 + t2) > r) return false;
+
+                return true;
+        }
+
+        @Override
+        public double Area() {
+                return 3.14*radius*radius;
+        }
+
+        @Override
+        public void print_details() {
+                System.out.println("\n"+getregion_name() + "has center at ("+center.x+","+center.y+")"+"with Area" + Area()+"\n");
+        }
+}
+_____________________________________________________________________________________________
+Rectangle.java
+
+package week_9;
+
+import java.util.Scanner;
+
+@SuppressWarnings("serial")
+public class Rectangle extends Region{
+
+        Point topleftcorner;
+        double height;
+        double width;
+        int i;
+
+        Rectangle(){
+                topleftcorner = new Point();
+                get();
+        }
+
+        void get(){
+                Scanner in = new Scanner(System.in);
+
+                System.out.print("Enter name_of_region: ");
+                name_of_region = in.next();
+
+                System.out.print("Enter topleft corner X coordinate :");
+                topleftcorner.x = in.nextInt();
+
+                System.out.print("Enter topleft corner Y coordinate :");
+                topleftcorner.y = in.nextInt();
+
+                System.out.print("Enter height: ");
+                height = in.nextDouble();
+
+                System.out.print("Enter width: ");
+                width = in.nextDouble();
+        }
+
+        @Override
+        public boolean Contains(Point p) {
+                double w = topleftcorner.x - width;
+                double h = topleftcorner.y - height;
+
+                if( (p.x < topleftcorner.x && p.x > w) && (p.y < topleftcorner.y && p.y > h) ) return true;
+
+                return false;
+        }
+
+        @Override
+        public double Area() {
+                return height*width;
+        }
+
+        @Override
+        public void print_details() {
+                System.out.println("\n"+getregion_name() + " has Area "+ Area());
+        }
+}
+_____________________________________________________________________________________________________
+Point.java
+
+package week_9;
+
+import java.io.*;
+
+public class Point implements Serializable{
+        int x,y;
+
+        Point(){
+                x = 0;
+                y = 0;
+        }
+}
+__________________________________________________________________________________
+InterfaceRegion.java
+
+package week_9;
+
+
+public interface InterfaceRegion {
+        public boolean Contains(Point p);
+        public double Area();
+        public void print_details();
+}
+__________________________________________________________________________________
+Region.java
+
+package week_9;
+
+import java.io.*;
+@SuppressWarnings("serial")
+public abstract class Region implements InterfaceRegion,Serializable{
+        String name_of_region;
+
+        String getregion_name() {
+                return name_of_region;
+        }
+
+        public abstract boolean Contains(Point p);
+        public abstract double Area();
+        public abstract void print_details();
+
+}
+___________________________________________________________________________________
+TestCircle.java
+
+package week_9;
+
+import java.util.*;
+
+public class TestCircle{
+        @SuppressWarnings("resource")
+        public static void main(String args[]) {
+                int n;
+                Point p = new Point();
+
+                Scanner in = new Scanner(System.in);
+
+                System.out.print("Enter the number of circle: ");
+                n = in.nextInt();
+
+                Circle c[] = new Circle[n];
+
+                for(int i=0;i<n;i++) {
+                        c[i] = new Circle();
+                }
+
+                for(int i=0;i<n;i++) c[i].Area();
+
+                System.out.print("Coordinates to check contain\nEnter x:");
+                p.x = in.nextInt();
+
+                System.out.print("Enter y:");
+                p.y = in.nextInt();
+
+                System.out.print("Enter which circle to check: ");
+                int no = in.nextInt();
+
+                try{
+                        if(c[no].Contains(p)) {
+                                System.out.println("Point is present in the circle");
+                        }
+                        else {
+                                throw new Exception("Point not present");
+                        }
+                }
+                catch(Exception e) {
+                        System.out.print(e.toString());
+                }
+
+                try {
+                        for(int i=0; i<n+1;i++) {
+                                c[i].print_details();
+                        }
+                }
+                catch(ArrayIndexOutOfBoundsException e) {
+                        System.out.print(e.toString());
+                }
+
+                in.close();
+        }
+}
+____________________________________________________________________________________________________
+TestRectangle.java
+
+package week_9;
+
+import java.util.*;
+import java.io.*;
+
+public class TestRectangle {
+        public static  void main(String args[]) throws FileNotFoundException {
+
+                Scanner in = new Scanner(System.in);
+
+                Point p = new Point();
+                Rectangle r = new Rectangle();
+
+                r.Area();
+
+                System.out.print("Enter co-ordinates to check\nEnter x: " );
+                p.x = in.nextInt();
+
+                System.out.print("Enter y: ");
+                p.y = in.nextInt();
+
+                if(r.Contains(p)) System.out.println("Point is Inside the rectangle");
+                else System.out.println("Point is not Inside the rectangle");
+
+                try{
+                        System.out.println("Enter the file name to store: ");
+                        String filename = in.next();
+
+                        FileOutputStream fileout = new FileOutputStream("./"+filename);
+                        ObjectOutputStream objout = new ObjectOutputStream(fileout);
+
+                        objout.writeObject(r);
+                        System.out.println("\nObject created and written on the file....!!");
+
+                        fileout.close();
+                        objout.close();
+
+                        FileInputStream filein = new FileInputStream(filename);
+                        ObjectInputStream objin = new ObjectInputStream(filein);
+
+                        Rectangle r1 = (Rectangle) objin.readObject();
+
+                        System.out.println("\nObject read from file");
+
+                        filein.close();
+                        objin.close();
+
+                        //System.out.print(r1);
+                }
+                catch(FileNotFoundException ex) {
+                        System.out.println(ex.toString());
+                }
+                catch(IOException e) {
+                        System.out.print(e.toString());
+                } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                }
+
+                r.print_details();
+
+                in.close();
+        }
+}
+____________________________________________________________________________________________________________
+AnagramException.java
+
+package week_8;
+
+import java.util.Scanner;
+
+public class AnagramException {
+public static boolean isAnagram(String s1,String s2) throws NullPointerException{
+        if(s1.length() == 0 || s2.length() == 0) {
+                throw new NullPointerException("Given String is empty");
+        }
+                int arr[] = new int[26];
+
+                for(int i=0;i<s1.length();i++) {
+                        arr[s1.charAt(i)-'a']++;
+                }
+
+
+                for(int i=0;i<s2.length();i++) {
+                        arr[s2.charAt(i)-'a']--;
+                }
+
+                for(int i=0;i<26;i++) {
+                        if(arr[i] != 0) return false;
+                }
+
+                return true;
+        }
+
+        public static void main(String args[]) {
+
+                Scanner in = new Scanner(System.in);
+
+                System.out.print("\nEnter String1 : ");
+                String s1 = in.nextLine();
+
+                System.out.print("Enter String2 : ");
+                String s2 = in.nextLine();
+
+                try{
+                        boolean res = isAnagram(s1.toLowerCase(),s2.toLowerCase());
+                        if(res) System.out.println("\nStrings are Anagaram");
+                        else System.out.println("\nStrings are not Anagaram");
+                }
+                catch(NullPointerException ex) {
+                        System.out.print(ex.toString());
+                }
+
+                in.close();
+        }
+}
+________________________________________________________________________________________________
+Anagram.java
+
+package week8;
+import java.util.*;
+
+public class Anagram {
+        public static void main(String args[]) {
+                int arr[] = new int[26];
+                Scanner in = new Scanner(System.in);
+
+                System.out.print("Enter string 1: ");
+                String s1 = in.next();
+
+                System.out.print("Enter string 2: ");
+                String s2 = in.next();
+
+                for(int i=0;i<s1.length();i++) {
+                        arr[s1.charAt(i)-'a']++;
+                }
+
+                for(int i=0;i<s2.length();i++) {
+                        arr[s2.charAt(i)-'a']--;
+                }
+
+                for(int i=0;i<26;i++)
+                        if(arr[i] != 0) {
+                                System.out.print("Not an anagram");
+                                in.close();
+                                return ;
+                        }
+
+                System.out.print("Anagram");
+                in.close();
+        }
+}
+_______________________________________________________________________________________________
+Course.java
+
+package week_8;
+
+public class Course {
+        String course_name;
+        int credits;
+        int nocourse;
+        int i;
+
+        Course courseEnrolled[];
+
+        void setno(int n) {
+                nocourse = n;
+                courseEnrolled = new Course[n];
+        }
+
+        public void addcourse(Course c) throws ArrayIndexOutOfBoundsException{
+                if(i+1 > nocourse) throw new ArrayIndexOutOfBoundsException("out of boundary\n");
+                courseEnrolled[i] = c;
+                i++;
+        }
+
+        public Course(String cn,int c) {
+                course_name = cn;
+                credits = c;
+                i=0;
+        }
+
+        public Course() {
+        }
+}
+__________________________________________________________________________________________________
+CourseDriver.java
+
+package week_8;
+import java.util.*;
+
+public class CourseDriver {
+        public static void main(String args[]) {
+                Scanner in = new Scanner(System.in);
+                String cn;
+                int c,no;
+
+                Course c1 = new Course();
+
+                System.out.print("Enter number of courses : ");
+                no = in.nextInt();
+
+                c1.setno(no);
+
+                while(true){
+                        System.out.print("Enter course name [0 - exit]:");
+                        cn = in.next();
+
+                        if(cn.equals("0")) break;
+
+                        System.out.print("Enter credits: ");
+                        c = in.nextInt();
+
+                        Course t = new Course(cn,c);
+                        try{
+                                c1.addcourse(t);
+                        }
+                        catch(ArrayIndexOutOfBoundsException ex) {
+                                System.out.print(ex.toString());
+                        }
+                }
+
+                in.close();
+        }
+}
+_________________________________________________________________________________________
+EmployeeDriver.java
+
+package week_6;
+import java.util.*;
+
+public class EmployeeDriver {
+        @SuppressWarnings("resource")
+        public static void main(String args[]) {
+                int id,no_of_hrs;
+                double basic_salary,hra,wages_per_hr;
+                String designation;
+
+                Scanner in = new Scanner(System.in);
+
+                FullTime t = new FullTime();
+                PartTime p = new PartTime();
+
+                try {
+                        while(true) {
+                                System.out.print("\n1.Full time\n2.Part time\n3.Display\n4.Exit\n");
+                                int ch = in.nextInt();
+
+                                if(ch == 4) break;
+
+                                if(ch == 1) {
+                                        try{
+                                                System.out.print("\nEnter Employee id :");
+                                                id = in.nextInt();
+
+                                                System.out.print("Enter Designation :");
+                                                designation = in.next();
+
+                                                System.out.print("Enter basic salary :");
+                                                basic_salary = in.nextDouble();
+
+                                                System.out.print("Enter HRA :");
+                                                hra = in.nextDouble();
+
+                                                t = new FullTime(id,basic_salary,designation,hra);
+                                        }
+                                        catch(InputMismatchException ex) {
+                                                System.out.print("\nInput mismatch Exception arised\n");
+                                                throw new IllegalArgumentException("Argument is not of correct type\n");
+                                        }
+                                }
+
+                                if(ch == 2) {
+                                        System.out.print("\nEnter Employee id :");
+                                        id = in.nextInt();
+
+                                        System.out.print("Enter Designation :");
+                                        designation = in.next();
+
+                                        System.out.print("Enter Number of hours :");
+                                        no_of_hrs = in.nextInt();
+
+                                        System.out.print("Enter wages/hr :");
+                                        wages_per_hr = in.nextDouble();
+
+                                        p = new PartTime(id,designation,no_of_hrs,wages_per_hr);
+                                }
+
+                                if(ch == 3) {
+                                        System.out.print("\n1.FullTime\n2.Parttime\n");
+                                        int c = in.nextInt();
+
+                                        if(c == 1) {
+                                                String res = t.toString();
+                                                System.out.print(res);
+                                        }
+                                        else if(c == 2) {
+                                                String res = p.toString();
+                                                System.out.print(res);
+                                        }
+                                }
+                        }
+                }
+                catch(IllegalArgumentException ex) {
+                        System.out.print("\nIllegal Argument Exception Arised\n");
+                        System.out.print(ex.toString());
+                        //System.out.print(ex.printStackTrace());
+                }
+
+                System.out.print("Terminated...!");
+                in.close();
+        }
+}
+__________________________________________________________________________________________________________________
